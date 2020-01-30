@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 import dev.dextra.newsapp.R
 import dev.dextra.newsapp.api.model.Article
 import dev.dextra.newsapp.feature.sources.adapter.AbstractAdapter
@@ -43,13 +45,21 @@ class ArticleAdapter(
                 holder.itemView.setOnClickListener {
                     if (mContext is OnAdapterClick) mContext.onClick(this)
                 }
+                urlToImage?.let {
+                    Picasso.get()
+                        .load(it)
+                        .fit()
+                        .placeholder(R.drawable.placeholder_image)
+                        .error(R.drawable.ic_worldwide_news)
+                        .into(holder.articleImg)
+                }
             }
         }
     }
 
-    fun add(articles: MutableList<Article>) {
-        if (articles.isNotEmpty()) {
-            this.articles.addAll(articles)
+    fun add(serverArticles: MutableList<Article>) {
+        if (serverArticles.isNotEmpty()) {
+            this.articles.addAll(serverArticles)
             notifyDataSetChanged()
         }
     }
@@ -64,4 +74,5 @@ class VHArticle(view: View) : RecyclerView.ViewHolder(view) {
     val articleDescription: TextView = view.findViewById(R.id.article_description)
     val articleAuthor: TextView = view.findViewById(R.id.article_author)
     val articleDate: TextView = view.findViewById(R.id.article_date)
+    val articleImg: AppCompatImageView = view.findViewById(R.id.article_img)
 }
