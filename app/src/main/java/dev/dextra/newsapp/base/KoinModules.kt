@@ -16,10 +16,6 @@ val viewModelModules = module {
     factory { NewsViewModel(NewsRepository(EndpointService())) }
 }
 
-/*val viewModelNews = module {
-    factory { NewsViewModel(NewsRepository(EndpointService()), this) }
-}*/
-
 val serviceModules = module {
     single { EndpointService() }
 }
