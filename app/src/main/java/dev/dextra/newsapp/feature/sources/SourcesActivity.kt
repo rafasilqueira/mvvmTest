@@ -71,11 +71,11 @@ class SourcesActivity : BaseListActivity(), SourcesListAdapter.SourceListAdapter
     }
 
     private fun setupView() {
-        configureAutocompletes()
+        configureAutoCompletes()
         setupList()
     }
 
-    private fun configureAutocompletes() {
+    private fun configureAutoCompletes() {
         val countryAdapter = CustomArrayAdapter(this,
             R.layout.select_item,
             Country.values().toMutableList()

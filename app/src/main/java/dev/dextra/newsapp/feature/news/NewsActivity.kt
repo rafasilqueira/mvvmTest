@@ -1,27 +1,32 @@
 package dev.dextra.newsapp.feature.news
 
-import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Window
-import androidx.appcompat.app.AppCompatActivity
+import android.view.View
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import dev.dextra.newsapp.R
 import dev.dextra.newsapp.api.model.Article
 import dev.dextra.newsapp.api.model.Source
-import dev.dextra.newsapp.api.repository.NewsRepository
-import dev.dextra.newsapp.base.repository.EndpointService
+import dev.dextra.newsapp.base.BaseListActivity
 import dev.dextra.newsapp.feature.news.adapter.ArticleAdapter
 import dev.dextra.newsapp.feature.news.adapter.OnAdapterClick
 import kotlinx.android.synthetic.main.activity_news.*
+import org.koin.android.ext.android.inject
 
 const val NEWS_ACTIVITY_SOURCE = "NEWS_ACTIVITY_SOURCE"
 
-class NewsActivity : AppCompatActivity(), OnAdapterClick {
+class NewsActivity : BaseListActivity(), OnAdapterClick {
 
-    private val newsViewModel = NewsViewModel(NewsRepository(EndpointService()), this)
+    override val emptyStateTitle: Int = R.string.empty_state_title_source
+    override val emptyStateSubTitle: Int = R.string.empty_state_subtitle_source
+    override val errorStateTitle: Int = R.string.error_state_title_source
+    override val errorStateSubTitle: Int = R.string.error_state_subtitle_source
+    override val mainList: View get() = news_list
+
+    //private val newsViewModel = NewsViewModel(NewsRepository(EndpointService()), this)
+    private val newsViewModel: NewsViewModel by inject()
     private val articleAdapter = ArticleAdapter(this@NewsActivity)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,29 +65,26 @@ class NewsActivity : AppCompatActivity(), OnAdapterClick {
         startActivity(i)
     }
 
-    private var loading: Dialog? = null
-
-    fun showLoading() {
-        if (loading == null) {
-            loading = Dialog(this)
-            loading?.apply {
-                requestWindowFeature(Window.FEATURE_NO_TITLE)
-                window?.setBackgroundDrawableResource(android.R.color.transparent)
-                setContentView(R.layout.dialog_loading)
-            }
-        }
-        loading?.show()
-    }
-
-    fun hideLoading() {
-        loading?.dismiss()
-    }
-
     private fun showData() {
         newsViewModel.articles.observe(this, Observer {
             articleAdapter.apply {
                 add(it)
             }
         })
+
+        newsViewModel.networkState.observe(this, networkStateObserver)
     }
+
+    override fun setupLandscape() {
+
+    }
+
+    override fun setupPortrait() {
+
+    }
+
+    override fun executeRetry() {
+
+    }
+
 }
