@@ -25,7 +25,6 @@ class NewsActivity : BaseListActivity(), OnAdapterClick {
     override val errorStateSubTitle: Int = R.string.error_state_subtitle_source
     override val mainList: View get() = news_list
 
-    //private val newsViewModel = NewsViewModel(NewsRepository(EndpointService()), this)
     private val newsViewModel: NewsViewModel by inject()
     private val articleAdapter = ArticleAdapter(this@NewsActivity)
 
@@ -66,7 +65,7 @@ class NewsActivity : BaseListActivity(), OnAdapterClick {
     }
 
     private fun showData() {
-        newsViewModel.articles.observe(this, Observer {
+        newsViewModel.currentArticles.observe(this, Observer {
             articleAdapter.apply {
                 add(it)
             }
@@ -84,7 +83,8 @@ class NewsActivity : BaseListActivity(), OnAdapterClick {
     }
 
     override fun executeRetry() {
-
+        newsViewModel.currentPage = 1
+        newsViewModel.loadNews()
     }
 
 }

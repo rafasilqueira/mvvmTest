@@ -8,37 +8,40 @@ import dev.dextra.newsapp.base.BaseViewModel
 import dev.dextra.newsapp.base.NetworkState
 
 
-class NewsViewModel(
-    private val newsRepository: NewsRepository
-    //private val newsActivity: NewsActivity
-) : BaseViewModel() {
+class NewsViewModel(private val newsRepository: NewsRepository) : BaseViewModel() {
 
     private lateinit var source: Source
-    val articles = MutableLiveData<MutableList<Article>>()
+    val currentArticles = MutableLiveData<MutableList<Article>>()
     val networkState = MutableLiveData<NetworkState>()
     var currentPage = 1
     var totalResults = 0
+    var currentResults: Int = 0
 
 
     fun configureSource(source: Source) {
         this.source = source
     }
 
+    init {
+        currentArticles.value = ArrayList()
+    }
+
     fun loadNews() {
-        //newsActivity.showLoading()
         networkState.postValue(NetworkState.RUNNING)
         addDisposable(
             newsRepository.getEverything(source.id, currentPage)
                 .subscribe({ response ->
-                    articles.postValue(response.articles.toMutableList())
+                    val serverArticles = response.articles.toMutableList()
+                    currentArticles.postValue(serverArticles)
+
+                    updateCurrentResults(serverArticles.size)
                     setTotalResult(response.totalResults)
+
                     if (!isMaxResultsReached()) addPage()
-                    networkState.postValue(NetworkState.SUCCESS)
+
                     setupNetworkState()
-                    //newsActivity.hideLoading()
                 }, {
                     setupNetworkState()
-                    //newsActivity.hideLoading()
                 })
         )
     }
@@ -52,14 +55,18 @@ class NewsViewModel(
     }
 
     private fun setupNetworkState() {
-        articles.value?.let {
-            if (it.isEmpty()) {
-                networkState.postValue(NetworkState.ERROR)
-            } else {
-                networkState.postValue(NetworkState.SUCCESS)
-            }
+        if (currentResults == 0) {
+            networkState.postValue(NetworkState.ERROR)
+        } else {
+            networkState.postValue(NetworkState.SUCCESS)
         }
+
+
     }
 
-    fun isMaxResultsReached() = articles.value?.size == totalResults
+    private fun updateCurrentResults(results: Int) {
+        currentResults += results
+    }
+
+    fun isMaxResultsReached() = currentResults >= totalResults
 }
